@@ -119,7 +119,6 @@ app.put("/image", (req, res) => {
     .catch(() => res.status(400).json("something is wrong"));
 });
 
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-  console.log("app running on " + PORT );
+app.listen(process.env.PORT || 3000, () => {
+  console.log("app running on " + process.env.PORT);
 });
