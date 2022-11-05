@@ -24,7 +24,7 @@ db.select("*")
   .then((data) => console.log(data));
 
 app.get("/", (req, res) => {
-  res.json(db.users);
+  res.json("its working");
 });
 //signIn
 app.post("/signIn", (req, res) => {
