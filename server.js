@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 
 db.select("*")
   .from("users")
-  .then((data) => console.log(data));
+  .then((data) => {});
 
 app.get("/", (req, res) => {
   res.json("its working");
@@ -119,6 +119,6 @@ app.put("/image", (req, res) => {
     .catch(() => res.status(400).json("something is wrong"));
 });
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 4000, () => {
   console.log("app running on " + process.env.PORT);
 });
