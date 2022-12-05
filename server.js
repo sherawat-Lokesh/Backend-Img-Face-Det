@@ -8,24 +8,17 @@ const bcrypt = require("bcrypt-nodejs");
 const db = knex({
   client: "pg",
   connection: {
-    host: "127.0.0.1",
-
-    user: "postgres",
-    password: "12345@Temp",
-    database: "face_recognition_db",
+    host: "satao.db.elephantsql.com",
+    user: "awhwbrlv",
+    password: "jUR9rONQno8K9exmuJEEcrVnhvqiyCZv",
+    database: "awhwbrlv",
   },
 });
 
 app.use(cors());
 app.use(bodyParser.json());
 
-db.select("*")
-  .from("users")
-  .then((data) => {});
 
-app.get("/", (req, res) => {
-  res.json("its working");
-});
 //signIn
 app.post("/signIn", (req, res) => {
   const { userName, password } = req.body;
