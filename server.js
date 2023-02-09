@@ -1,17 +1,22 @@
-const express = require("express");
+import * as dotenv from 'dotenv'
+import express  from "express";
+import bodyParser from "body-parser";
+import cors from 'cors'
+import knex from "knex";
+import bcrypt from 'bcrypt'
+
+dotenv.config()
 const app = express();
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const knex = require("knex");
-const bcrypt = require("bcrypt-nodejs");
+const saltRounds=10;
+
 
 const db = knex({
   client: "pg",
   connection: {
-    host: "satao.db.elephantsql.com",
-    user: "awhwbrlv",
-    password: "jUR9rONQno8K9exmuJEEcrVnhvqiyCZv",
-    database: "awhwbrlv",
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
   },
 });
 
@@ -25,29 +30,24 @@ app.post("/signIn", (req, res) => {
   if (!userName || !password) {
     return res.status(400).json("please enter valid details");
   }
-  db.select("username", "hash")
-    .from("login")
-    .where("username", "=", userName)
+
+db.select("username", "hash").from("login")
+  .where("username", "=", userName)
     .then((data) => {
-      const isValid = bcrypt.compareSync(password, data[0].hash);
-      if (isValid) {
-        return db
-          .select("*")
-          .from("users")
-          .where("username", "=", userName)
-          .then((user) => {
-            res.json(user[0]);
-          })
-          .catch(() => {
-            res.status(400).json("user not found");
-          });
-      } else {
-        res.status(400).json("wrong credential");
-      }
-    })
-    .catch(() => {
-      res.status(404).json("worng credential");
-    });
+      bcrypt.compare(password,data[0].hash, function(err, result) {
+        // result returns true or false after matching password
+        if (result ==true) {
+          return db
+            .select("*")
+              .from("users")
+                .where("username", "=", userName)
+                  .then((user) => {
+                    res.json(user[0]);
+                  }).catch(() => {res.status(400).json("user not found");});
+        } else {res.status(400).json("wrong credential");}
+      });
+      
+    }).catch(() => {res.status(404).json("worng credential");});
 });
 
 //register
@@ -56,8 +56,12 @@ app.post("/Register", (req, res) => {
   if (!name || !userName || !password) {
     return res.status(400).json("please enter vlaid credential");
   }
-  const hash = bcrypt.hashSync(password);
-  db.transaction((trx) => {
+
+   bcrypt.hash(password,saltRounds,function(err,hash){
+    
+    if(err)return res.status(400).json('Something went wrong!');
+
+    db.transaction((trx) => {
     trx
       .insert({
         hash: hash,
@@ -78,6 +82,8 @@ app.post("/Register", (req, res) => {
       .then(trx.commit)
       .catch(trx.rollback);
   }).catch((err) => res.status(400).json("unable to register"));
+  })
+  
 });
 
 //profile
@@ -113,5 +119,5 @@ app.put("/image", (req, res) => {
 });
 
 app.listen(process.env.PORT || 4000, () => {
-  console.log("app running on " + process.env.PORT);
+  console.log("app running on " + (process.env.PORT||4000));
 });
